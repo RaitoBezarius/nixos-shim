@@ -45,7 +45,7 @@ resource "hydra_jobset" "main" {
   input {
     name = "nixos-shim"
     type = "git"
-    value = "https://github.com/RaitoBezarius/nixos-shim"
+    value = "https://github.com/RaitoBezarius/nixos-shim main"
     notify_committers = false
   }
 
