@@ -38,7 +38,7 @@ resource "hydra_jobset" "main" {
   input {
     name = "nixpkgs"
     type = "git"
-    value = "https://github.com/NixOS/nixpkgs"
+    value = "https://github.com/NixOS/nixpkgs nixos-unstable-small"
     notify_committers = false
   }
 
