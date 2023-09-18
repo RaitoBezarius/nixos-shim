@@ -66,6 +66,12 @@ resource "hydra_jobset" "main" {
   }
 
   input {
+    name = "flake-parts"
+    type = "git"
+    value = "https://github.com/hercules-ci/flake-parts main"
+  }
+
+  input {
     name = "flake-compat"
     type = "git"
     value = "https://github.com/lheckemann/flake-compat add-overrideInputs"
