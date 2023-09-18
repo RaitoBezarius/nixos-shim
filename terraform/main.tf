@@ -69,6 +69,7 @@ resource "hydra_jobset" "main" {
     name = "flake-parts"
     type = "git"
     value = "https://github.com/hercules-ci/flake-parts main"
+    notify_committers = false
   }
 
   input {
