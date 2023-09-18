@@ -65,7 +65,7 @@ resource "hydra_jobset" "main" {
     notify_committers = false
   }
 
-  check_interval    = 0
+  check_interval    = 300
   scheduling_shares = 3000
   keep_evaluations  = 3
 
