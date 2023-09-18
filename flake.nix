@@ -9,8 +9,11 @@
     lanzaboote.url = "github:nix-community/lanzaboote/v0.3.0";
   };
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (
-    toplevel@{ config, ... }: {
+    toplevel@{ config, self, ... }: {
     systems = ["x86_64-linux" "aarch64-linux"];
+    flake.hydraJobs = {
+      inherit (self) packages;
+    };
     perSystem = { config, pkgs, self', ... }: {
       packages = {
         shim-unsigned = pkgs.shim-unsigned.override {
