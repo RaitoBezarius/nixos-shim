@@ -65,6 +65,13 @@ resource "hydra_jobset" "main" {
     notify_committers = false
   }
 
+  input {
+    name = "flake-compat"
+    type = "git"
+    value = "https://github.com/lheckemann/flake-compat add-overrideInputs"
+    notify_committers = false
+  }
+
   check_interval    = 300
   scheduling_shares = 3000
   keep_evaluations  = 3
