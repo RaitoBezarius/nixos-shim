@@ -43,41 +43,9 @@ resource "hydra_jobset" "main" {
   state       = "enabled"
   visible     = true
   name        = "main"
-  type        = "legacy"
-  description = "master branch"
-
-  nix_expression {
-    file  = "release.nix"
-    input = "nixos-shim"
-  }
-
-  input {
-    name              = "nixpkgs"
-    type              = "git"
-    value             = "https://github.com/NixOS/nixpkgs nixos-unstable-small"
-    notify_committers = false
-  }
-
-  input {
-    name              = "nixos-shim"
-    type              = "git"
-    value             = "https://github.com/RaitoBezarius/nixos-shim main"
-    notify_committers = false
-  }
-
-  input {
-    name = "flake-parts"
-    type = "git"
-    value = "https://github.com/hercules-ci/flake-parts main"
-    notify_committers = false
-  }
-
-  input {
-    name = "flake-compat"
-    type = "git"
-    value = "https://github.com/lheckemann/flake-compat add-overrideInputs"
-    notify_committers = false
-  }
+  type        = "flake"
+  description = "main branch"
+  flake_uri   = "github:RaitoBezarius/nixos-shim"
 
   check_interval    = 300
   scheduling_shares = 3000
