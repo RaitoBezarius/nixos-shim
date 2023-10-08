@@ -28,6 +28,42 @@
             --output $out/share/shim/shimx64.efi \
             ${self'.packages.shim-unsigned}/share/shim/shimx64.efi
         '';
+        test-image = pkgs.vmTools.runInLinuxVM (pkgs.runCommand "test-image" {
+          nativeBuildInputs = [ pkgs.coreutils pkgs.systemd pkgs.dosfstools pkgs.mtools ];
+          preVM = ''
+            mkdir -p $out
+            ${pkgs.vmTools.qemu}/bin/qemu-img create -f qcow2 $out/test.qcow2 500M
+          '';
+          memSize = "4G";
+          QEMU_OPTS = "-drive file=$out/test.qcow2,if=virtio -smp 4";
+        } ''
+          mkdir -p esp/EFI/BOOT
+          cp ${self'.packages.shim-signed}/share/shim/shimx64.efi esp/EFI/BOOT/BOOTX64.EFI
+
+          mkdir repart.d
+          cat > repart.d/table.conf <<EOF
+          [Partition]
+          Type=esp
+          Format=vfat
+          CopyFiles=$PWD/esp/EFI:/EFI
+          EOF
+          systemd-repart --empty=require --dry-run=no --definitions=repart.d /dev/vda
+        '');
+        run-test-image = pkgs.writeScriptBin "run-test-image" ''
+          set -exuo pipefail
+          args=(
+            -m 2G -smp 4
+            -bios ${pkgs.OVMF.fd}/FV/OVMF.fd
+            -drive if=virtio,file=${self'.packages.test-image}/test.qcow2,snapshot=on
+            -net none
+            #-cdrom ~/deploy/result/iso/nixos.iso
+          )
+          ${pkgs.qemu_kvm}/bin/qemu-kvm "''${args[@]}"
+        '';
+      };
+      devShells.default = pkgs.mkShell {
+        buildInputs = with pkgs; [ uefi-run ];
+        ovmf = pkgs.OVMF.fd;
       };
     };
   });
