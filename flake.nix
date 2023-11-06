@@ -5,7 +5,7 @@
       flake = false;
     };
     flake-parts.url = "github:hercules-ci/flake-parts";
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
+    nixpkgs.url = "github:lheckemann/nixpkgs/shim";
     lanzaboote.url = "github:nix-community/lanzaboote/v0.3.0";
   };
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (
@@ -60,10 +60,30 @@
           )
           ${pkgs.qemu_kvm}/bin/qemu-kvm "''${args[@]}"
         '';
+
+        # nix build .#iso
+        # qemu-kvm -m 2G -smp 4 -bios $ovmf/FV/OVMF.fd -cdrom result/iso/*.iso -net none
+        iso = let
+          configModule = { modulesPath, ... }: {
+            imports = [
+              #(modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")
+              (modulesPath + "/installer/cd-dvd/iso-image.nix")
+            ];
+            secureboot = {
+              signingCertificate = ./pki/snakeoil-vendor-cert.pem;
+              privateKeyFile = ./pki/snakeoil-vendor-key.pem;
+              shim = "${self'.packages.shim-signed}/share/shim/shimx64.efi";
+            };
+            # for faster build
+            isoImage.squashfsCompression = "zstd -Xcompression-level 6";
+            isoImage.makeEfiBootable = true;
+          };
+          nixos = pkgs.nixos configModule;
+        in nixos.config.system.build.isoImage;
       };
       devShells.default = pkgs.mkShell {
-        buildInputs = with pkgs; [ uefi-run ];
-        ovmf = pkgs.OVMF.fd;
+        buildInputs = with pkgs; [ uefi-run sbsigntool ];
+        ovmf = (pkgs.OVMF.override {secureBoot = true;}).fd;
       };
     };
   });
