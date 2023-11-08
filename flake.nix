@@ -82,22 +82,24 @@
               } ''
               ${pkgs.python3Packages.ovmfvartool}/bin/ovmfvartool compile $vars $out
             '';
+
+            run-iso = pkgs.writeScriptBin "run-secureboot-iso-in-qemu" ''
+              args=(
+                -m 2G
+                -smp 4
+                -cdrom ${self'.packages.iso}/iso/*.iso
+                -net none
+                -serial stdio
+                -drive "if=pflash,format=raw,readonly=on,file=${self'.packages.ovmf}/FV/OVMF_CODE.fd"
+                -drive "if=pflash,format=raw,snapshot=on,file=${self'.packages.ovmf_vars}"
+              )
+              qemu-kvm "''${args[@]}"
+            '';
           };
 
         apps.default = {
           type = "app";
-          program = pkgs.writeScriptBin "run-secureboot-iso-in-qemu" ''
-            args=(
-              -m 2G
-              -smp 4
-              -cdrom ${self'.packages.iso}/iso/*.iso
-              -net none
-              -serial stdio
-              -drive "if=pflash,format=raw,readonly=on,file=${self'.packages.ovmf}/FV/OVMF_CODE.fd"
-              -drive "if=pflash,format=raw,snapshot=on,file=${self'.packages.ovmf_vars}"
-            )
-            qemu-kvm "''${args[@]}"
-          '';
+          program = self'.packages.run-iso;
         };
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [ uefi-run sbsigntool python3Packages.ovmfvartool ];
