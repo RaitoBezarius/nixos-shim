@@ -125,6 +125,7 @@
             -smp 4
             -cdrom ${self'.packages.iso}/iso/*.iso
             -net none
+            -serial stdio
             -drive "if=pflash,format=raw,readonly=on,file=${self'.packages.ovmf}/FV/OVMF_CODE.fd"
             -drive "if=pflash,format=raw,snapshot=on,file=${self'.packages.ovmf_vars}"
           )
