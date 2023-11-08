@@ -63,9 +63,6 @@
           ${pkgs.qemu_kvm}/bin/qemu-kvm "''${args[@]}"
         '';
 
-        # nix build .#iso
-        # qemu-kvm -m 2G -smp 4 -cdrom result/iso/*.iso -net none
-        # -drive "if=pflash,format=raw,readonly=on,file=$ovmf/FV/OVMF_CODE.fd" -drive "if=pflash,format=raw,snapshot=on,file=$ovmf/FV/OVMF_VARS.fd"
         iso = let
           configModule = { modulesPath, pkgs, ... }: {
             imports = [
@@ -112,10 +109,32 @@
 
         ovmf = (inputs.nixpkgs-old.legacyPackages.${system}.OVMF.override {secureBoot = true;}).fd;
         #ovmf = (inputs.nixpkgs.legacyPackages.${system}.OVMF.override {secureBoot = true;}).fd;
+
+        ovmf_vars = pkgs.runCommand "OVMF_VARS.fd" {
+          vars = ./vars.yaml;
+        } ''
+          ${pkgs.python3Packages.ovmfvartool}/bin/ovmfvartool compile $vars $out
+        '';
+      };
+
+      apps.default = {
+        type = "app";
+        program = pkgs.writeScriptBin "run-secureboot-iso-in-qemu" ''
+          args=(
+            -m 2G
+            -smp 4
+            -cdrom ${self'.packages.iso}/iso/*.iso
+            -net none
+            -drive "if=pflash,format=raw,readonly=on,file=${self'.packages.ovmf}/FV/OVMF_CODE.fd"
+            -drive "if=pflash,format=raw,snapshot=on,file=${self'.packages.ovmf_vars}"
+          )
+          qemu-kvm "''${args[@]}"
+        '';
       };
       devShells.default = pkgs.mkShell {
-        buildInputs = with pkgs; [ uefi-run sbsigntool ];
+        buildInputs = with pkgs; [ uefi-run sbsigntool python3Packages.ovmfvartool ];
         ovmf = self'.packages.ovmf;
+        inherit (self'.packages) ovmf_vars;
       };
     };
   });

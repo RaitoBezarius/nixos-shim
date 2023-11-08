@@ -1,0 +1,7 @@
+Variables:
+  50ab5d60-46e0-0043-abb6-3dd810dd8b23:
+    SHIM_VERBOSE:
+      Boot Access: true
+      Data: !!binary |
+        AQ==
+      Runtime Access: true
