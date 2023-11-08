@@ -99,9 +99,8 @@
                 set-shim-verbose
               '')
               (pkgs.writeShellScriptBin "set-shim-verbose" ''
-                cd /sys/firmware/efi/efivars
-                printf "\x01" >verbose
-                efivar --name 605dab50-e046-4300-abb6-3dd810dd8b23-SHIM_VERBOSE -w -f verbose
+                printf "\x01" >/tmp/verbose
+                efivar --name 605dab50-e046-4300-abb6-3dd810dd8b23-SHIM_VERBOSE -w -f /tmp/verbose
               '')
             ];
             systemd.tmpfiles.rules = [
