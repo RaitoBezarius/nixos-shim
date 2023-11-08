@@ -1,3 +1,7 @@
+# This is built into OVMF_VARS.fd by ovmfvartool (see the ovmf_vars
+# package in flake.nix).  We use it to pre-populate the SHIM_VERBOSE
+# EFI variable, so we can see shim's debug logging even when booting
+# for the first time.
 Variables:
   50ab5d60-46e0-0043-abb6-3dd810dd8b23:
     SHIM_VERBOSE:
