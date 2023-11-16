@@ -40,18 +40,6 @@
                 pkgs.sbsigntool
                 pkgs.efivar
                 pkgs.vim
-                (pkgs.writeShellScriptBin "enroll-keys" ''
-                  set -exuo pipefail
-                  # the only key that actually matters is the db one, so generate the others
-                  sbctl create-keys
-                  # and then replace the generated db cert with our test one
-                  sbctl import-keys --db-cert ${./pki/snakeoil-db-uefi.pem} --db-key ${./pki/snakeoil-db-uefi.key}
-                  # yolo (this shouldn't be done outside test environments!)
-                  sbctl enroll-keys --yes-this-might-brick-my-machine
-                '')
-              ];
-              systemd.tmpfiles.rules = [
-                "L+ /run/sbkeys - - - - ${./pki}"
               ];
             };
             nixos = pkgs.nixos configModule;
@@ -79,8 +67,16 @@
             ovmf_vars = pkgs.runCommand "OVMF_VARS.fd"
               {
                 vars = ./vars.yaml;
+                nativeBuildInputs = [ pkgs.python3Packages.virt-firmware ];
               } ''
-              ${pkgs.python3Packages.ovmfvartool}/bin/ovmfvartool compile $vars $out
+              args=(
+                -i ${self'.packages.ovmf}/FV/OVMF_VARS.fd
+                -o $out
+                --set-shim-verbose
+                --add-db 10a62c65-007e-4c1a-a5f2-e916b35a9442 ${./pki/snakeoil-db-uefi.pem}
+                --secure-boot
+              )
+              virt-fw-vars "''${args[@]}"
             '';
 
             run-iso = pkgs.writeScriptBin "run-secureboot-iso-in-qemu" ''
@@ -102,7 +98,7 @@
           program = self'.packages.run-iso;
         };
         devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [ uefi-run sbsigntool python3Packages.ovmfvartool ];
+          buildInputs = with pkgs; [ uefi-run sbsigntool python3Packages.virt-firmware ];
           ovmf = self'.packages.ovmf;
           inherit (self'.packages) ovmf_vars;
         };
