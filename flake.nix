@@ -73,6 +73,7 @@
                 -i ${self'.packages.ovmf}/FV/OVMF_VARS.fd
                 -o $out
                 --set-shim-verbose
+                --enroll-redhat
                 --add-db 10a62c65-007e-4c1a-a5f2-e916b35a9442 ${./pki/snakeoil-db-uefi.pem}
                 --secure-boot
               )
