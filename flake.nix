@@ -90,7 +90,7 @@
                 -drive "if=pflash,format=raw,readonly=on,file=${self'.packages.ovmf}/FV/OVMF_CODE.fd"
                 -drive "if=pflash,format=raw,snapshot=on,file=${self'.packages.ovmf_vars}"
               )
-              qemu-kvm "''${args[@]}"
+              qemu-kvm "''${args[@]}" "$@"
             '';
           };
 
