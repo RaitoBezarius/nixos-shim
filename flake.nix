@@ -47,6 +47,7 @@
           {
             shim-unsigned = pkgs.shim-unsigned.override {
               vendorCertFile = ./pki/snakeoil-vendor-cert.cer;
+              overrideSecurityPolicy = true;
             };
             # TODO: put it in passthru for shimx64.efi
             shim-signed = pkgs.runCommand "sign-shim" { } ''
