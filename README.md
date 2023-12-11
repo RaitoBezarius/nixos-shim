@@ -4,7 +4,12 @@ The goal of this project is to enable building NixOS installer images that will 
 
 ## Status
 
-It doesn't work yet :)
+We have an ISO that will boot on Secure Boot-enabled systems with test keys.
+
+You can try it out by running `nix run`.
+This will build a Secure Boot ISO image, with signatures from the test keys, and run it in a QEMU VM that has the test keys preconfigured.
+
+This will be bootable on systems without the test keys once our [shim-review application](https://github.com/lheckemann/shim-review) has been approved.
 
 ## How?
 
