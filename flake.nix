@@ -56,6 +56,7 @@
             nixos = pkgs.nixos configModule;
           in
           {
+            inherit (pkgs) grub2_efi;
             shim-unsigned = (pkgs.shim-unsigned.override {
               vendorCertFile = ./pki/snakeoil-vendor-cert.cer;
               overrideSecurityPolicy = true;
