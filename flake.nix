@@ -46,10 +46,17 @@
             nixos = pkgs.nixos configModule;
           in
           {
-            shim-unsigned = pkgs.shim-unsigned.override {
+            shim-unsigned = (pkgs.shim-unsigned.override {
               vendorCertFile = ./pki/snakeoil-vendor-cert.cer;
               overrideSecurityPolicy = true;
-            };
+            }).overrideAttrs (o: {
+              # Use 15.7 and official release tarball to conform to shim-review guidelines
+              version = "15.7";
+              src = pkgs.fetchurl {
+                url = "https://github.com/rhboot/shim/releases/download/15.7/shim-15.7.tar.bz2";
+                hash = "sha256-h83rGQ5cf+RBdp3eEaG1B+1zKOcKF4zZhYx6xwZc+t4=";
+              };
+            });
             # TODO: put it in passthru for shimx64.efi
             shim-signed = pkgs.runCommand "sign-shim" { } ''
               mkdir -p $out/share/shim
