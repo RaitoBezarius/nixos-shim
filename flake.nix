@@ -29,6 +29,7 @@
                 # TODO: use hardware module or something
                 privateKeyFile = ./pki/snakeoil-vendor-key.pem;
                 shim = "${self'.packages.shim-signed}/share/shim/shimx64.efi";
+                sbat = ./sbat.csv;
               };
               # for faster build
               isoImage.squashfsCompression = "zstd -Xcompression-level 6";
