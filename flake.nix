@@ -11,7 +11,7 @@
     nixpkgs-old.url = github:nixos/nixpkgs/8f40f2f90b9c9032d1b824442cfbbe0dbabd0dbd;
   };
   outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (
-    toplevel@{ config, self, ... }: {
+    toplevel@{ config, self, lib, ... }: {
       systems = [ "x86_64-linux" "aarch64-linux" ];
       flake.hydraJobs = {
         inherit (self) packages;
@@ -31,9 +31,19 @@
                 shim = "${self'.packages.shim-signed}/share/shim/shimx64.efi";
                 sbat = ./sbat.csv;
               };
+              isoImage.makeEfiBootable = true;
               # for faster build
               isoImage.squashfsCompression = "zstd -Xcompression-level 6";
-              isoImage.makeEfiBootable = true;
+              documentation.nixos.enable = false;
+              documentation.man.enable = false;
+              documentation.info.enable = false;
+
+              # We don't want to sign rEFInd and it won't work on secure-boot-enabled systems
+              isoImage.includeRefind = false;
+
+              boot.initrd.systemd.emergencyAccess = "$y$j9T$dNYBGEQKtpkkZDJGPOhea0$P0xeJ/2lhJXx2vk1QdxrKTC9nvImuh7IGieYVtpDAw6";
+              boot.initrd.systemd.services.emergency.environment.PAGER = "";
+              boot.loader.timeout = lib.mkForce 1;
 
               users.users.root.password = "";
               environment.systemPackages = [
