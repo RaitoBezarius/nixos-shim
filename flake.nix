@@ -23,8 +23,9 @@
               imports = [
                 #(modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")
                 (modulesPath + "/installer/cd-dvd/iso-image.nix")
+                (modulesPath + "/installer/cd-dvd/iso-image-secureboot.nix")
               ];
-              secureboot = {
+              boot.secureboot = {
                 signingCertificate = ./pki/snakeoil-vendor-cert.pem;
                 # TODO: use hardware module or something
                 privateKeyFile = ./pki/snakeoil-vendor-key.pem;
@@ -41,6 +42,7 @@
               # We don't want to sign rEFInd and it won't work on secure-boot-enabled systems
               isoImage.includeRefind = false;
 
+              # blank password
               boot.initrd.systemd.emergencyAccess = "$y$j9T$dNYBGEQKtpkkZDJGPOhea0$P0xeJ/2lhJXx2vk1QdxrKTC9nvImuh7IGieYVtpDAw6";
               boot.initrd.systemd.services.emergency.environment.PAGER = "";
               boot.loader.timeout = lib.mkForce 1;
