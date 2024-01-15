@@ -54,6 +54,17 @@
                 pkgs.efivar
                 pkgs.vim
               ];
+              boot.kernelParams = ["systemd.log_level=debug"];
+              lib.isoFileSystems."/share" = {
+                device = "share";
+                fsType = "9p";
+                options = [
+                  "trans=virtio"
+                  "version=9p2000.L"
+                  "msize=16384"
+                  "nofail"
+                ];
+              };
             };
             nixos = pkgs.nixos configModule;
           in
@@ -83,7 +94,11 @@
             iso = nixos.config.system.build.isoImage;
             efiDir = nixos.config.system.build.efiDir;
 
-            ovmf = (inputs.nixpkgs-old.legacyPackages.${system}.OVMF.override { secureBoot = true; }).fd;
+            ovmf = (inputs.nixpkgs.legacyPackages.${system}.OVMF.override {
+              secureBoot = true;
+              #debug = true;
+              #sourceDebug = false;
+            }).fd;
             #ovmf = (inputs.nixpkgs.legacyPackages.${system}.OVMF.override {secureBoot = true;}).fd;
 
             ovmf_vars = pkgs.runCommand "OVMF_VARS.fd"
@@ -103,14 +118,16 @@
             '';
 
             run-iso = pkgs.writeScriptBin "run-secureboot-iso-in-qemu" ''
+              mkdir -p share
               args=(
                 -m 2G
                 -smp 4
                 -cdrom ${self'.packages.iso}/iso/*.iso
                 -net none
-                -serial stdio
+                -serial file:serial.log
                 -drive "if=pflash,format=raw,readonly=on,file=${self'.packages.ovmf}/FV/OVMF_CODE.fd"
                 -drive "if=pflash,format=raw,snapshot=on,file=${self'.packages.ovmf_vars}"
+                -virtfs local,path=./share,mount_tag=share,security_model=none
               )
               qemu-kvm "''${args[@]}" "$@"
             '';
@@ -121,7 +138,7 @@
           program = self'.packages.run-iso;
         };
         devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [ uefi-run sbsigntool python3Packages.virt-firmware ];
+          buildInputs = with pkgs; [ uefi-run sbsigntool grub2_efi python3Packages.virt-firmware ];
           ovmf = self'.packages.ovmf;
           inherit (self'.packages) ovmf_vars;
         };
