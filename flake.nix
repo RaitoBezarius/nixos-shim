@@ -74,11 +74,11 @@
               vendorCertFile = ./pki/snakeoil-vendor-cert.cer;
               overrideSecurityPolicy = true;
             }).overrideAttrs (o: {
-              # Use 15.7 and official release tarball to conform to shim-review guidelines
-              version = "15.7";
+              # Use 15.8 and official release tarball to conform to shim-review guidelines
+              version = "15.8";
               src = pkgs.fetchurl {
-                url = "https://github.com/rhboot/shim/releases/download/15.7/shim-15.7.tar.bz2";
-                hash = "sha256-h83rGQ5cf+RBdp3eEaG1B+1zKOcKF4zZhYx6xwZc+t4=";
+                url = "https://github.com/rhboot/shim/releases/download/15.8/shim-15.8.tar.bz2";
+                hash = "sha256-p58Km4nzaBqzhIZbGkarP3nYixG0ylmqBAqwP/+ugKk=";
               };
             });
             # TODO: put it in passthru for shimx64.efi
